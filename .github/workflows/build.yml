@@ -116,9 +116,9 @@ jobs:
             poll: "-DFORCE_POLL=OFF"
             upload: false
             ndpi_min_version: "4.8"
-          - compiler: "cc"
+          - compiler: "clang"
             os: "macOS-latest"
-            ndpi_build: "-DBUILD_NDPI=OFF"
+            ndpi_build: "-DBUILD_NDPI=ON"
             ndpid_examples: "-DBUILD_EXAMPLES=OFF"
             ndpid_gcrypt: "-DNDPI_WITH_GCRYPT=OFF"
             ndpid_zlib: "-DENABLE_ZLIB=ON"
@@ -155,12 +155,12 @@ jobs:
       - name: Install MacOS Prerequisites
         if: startsWith(matrix.os, 'macOS')
         run: |
-          brew install coreutils flock automake make unzip
-          wget 'https://www.tcpdump.org/release/libpcap-1.10.4.tar.gz'
-          tar -xzvf libpcap-1.10.4.tar.gz
-          cd libpcap-1.10.4
-          ./configure && make install
-          cd ..
+          brew install coreutils flock automake make unzip cmake pkg-config git wget
+          #wget 'https://www.tcpdump.org/release/libpcap-1.10.4.tar.gz'
+          #tar -xzvf libpcap-1.10.4.tar.gz
+          #cd libpcap-1.10.4
+          #./configure && make install
+          #cd ..
           wget 'https://github.com/ntop/nDPI/archive/refs/heads/dev.zip' -O libndpi-dev.zip
           unzip libndpi-dev.zip
           cd nDPI-dev
@@ -194,9 +194,9 @@ jobs:
         run: |
           cmake --build build --verbose
       - name: Build single nDPId executable (invoke CC directly)
-        if: (endsWith(matrix.compiler, 'gcc') || endsWith(matrix.compiler, 'clang')) && startsWith(matrix.coverage, '-DENABLE_COVERAGE=OFF') && startsWith(matrix.sanitizer, '-DENABLE_SANITIZER=ON') && startsWith(matrix.ndpid_gcrypt, '-DNDPI_WITH_GCRYPT=OFF') && startsWith(matrix.ndpid_zlib, '-DENABLE_ZLIB=ON')
+        if: endsWith(matrix.compiler, 'gcc-7') == false && startsWith(matrix.coverage, '-DENABLE_COVERAGE=OFF') && startsWith(matrix.sanitizer, '-DENABLE_SANITIZER=ON') && startsWith(matrix.ndpid_gcrypt, '-DNDPI_WITH_GCRYPT=OFF') && startsWith(matrix.ndpid_zlib, '-DENABLE_ZLIB=ON')
         run: |
-          cc -Wall -Wextra -std=gnu99 -fsanitize=address -fsanitize=undefined -fno-sanitize=alignment -fsanitize=enum -fsanitize=leak nDPId.c nio.c utils.c -I./build/libnDPI/include/ndpi -I. -I./dependencies -I./dependencies/jsmn -I./dependencies/uthash/include -o /tmp/a.out -lpcap ./build/libnDPI/lib/libndpi.a -pthread -lm -lz
+          cc -Wall -Wextra -std=gnu99 ${{ matrix.poll }} -fsanitize=address -fsanitize=undefined -fno-sanitize=alignment -fsanitize=enum -fsanitize=leak nDPId.c nio.c utils.c -I./build/libnDPI/include/ndpi -I. -I./dependencies -I./dependencies/jsmn -I./dependencies/uthash/include -o /tmp/a.out -lpcap ./build/libnDPI/lib/libndpi.a -pthread -lm -lz
       - name: Test EXEC
         run: |
           ./build/nDPId-test
