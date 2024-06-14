@@ -10,13 +10,6 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif(CMAKE_COMPILER_IS_GNUCXX)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -D_DEFAULT_SOURCE=1 -D_GNU_SOURCE=1")
-if("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
-    message(FATAL_ERROR "In-source builds are not allowed.\n"
-                        "Please remove ${PROJECT_SOURCE_DIR}/CMakeCache.txt\n"
-                        "and\n"
-                        "${PROJECT_SOURCE_DIR}/CMakeFiles\n"
-                        "Create a build directory somewhere and run CMake again.")
-endif()
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 find_package(PkgConfig REQUIRED)
 
